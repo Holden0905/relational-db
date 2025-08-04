@@ -258,7 +258,7 @@ main {
     width: 100%;
     min-height: 500px;
     background: var(--white);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     border: 2px solid var(--primary-green);
@@ -280,6 +280,7 @@ main {
     border: 1px solid var(--primary-green);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 0;
 }
 
 /* Bottom grid for components and details */
@@ -315,7 +316,8 @@ main {
 /* Upload button styling for main PDF section */
 .pdf-upload-main {
     text-align: center;
-    padding: 2rem;
+    padding: 0.25rem;
+    margin-top: 0.1rem;
 }
 
 /* Responsive adjustments */
