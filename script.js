@@ -54,6 +54,22 @@ function handleRowClick(component) {
         <h3>${component.Drawing} - ${component.Component}</h3>
         <p><strong>Unit:</strong> ${component.Unit}</p>
         <p><strong>Component ID:</strong> ${component.id}</p>
+        
+        <div id="pdf-section" style="margin: 1rem 0;">
+            <h4>Drawing PDF</h4>
+            <div id="pdf-display">
+                ${component.drawing_pdf_url ? 
+                    `<iframe src="${component.drawing_pdf_url}" width="100%" height="400px" style="border: 1px solid #ddd; border-radius: 4px;"></iframe>` 
+                    : '<p>No PDF uploaded for this component.</p>'
+                }
+            </div>
+            <div style="margin-top: 10px;">
+                <button onclick="showPDFUpload(${component.id})" class="btn btn-primary">
+                    ${component.drawing_pdf_url ? 'Replace PDF' : 'Upload PDF'}
+                </button>
+            </div>
+        </div>
+        
         <div id="readings-section">
             <h4>Readings</h4>
             <p>Loading readings...</p>
@@ -337,6 +353,115 @@ async function updateReading(readingId, componentId) {
         
         // Reload the readings to show the updated data
         loadReadingsForComponent(componentId)
+        
+    } catch (err) {
+        console.error('Unexpected error:', err)
+        alert('Unexpected error occurred')
+    }
+}
+
+// Function to show PDF upload form
+function showPDFUpload(componentId) {
+    const pdfSection = document.getElementById('pdf-section')
+    
+    pdfSection.innerHTML = `
+        <h4>Upload Drawing PDF</h4>
+        <div class="form-container">
+            <form id="pdf-upload-form">
+                <div class="form-group">
+                    <label for="pdf-file">Select PDF File:</label>
+                    <input type="file" id="pdf-file" class="form-control" accept=".pdf" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload PDF</button>
+                <button type="button" onclick="location.reload()" class="btn btn-danger" style="margin-left: 10px;">Cancel</button>
+            </form>
+        </div>
+        <div id="upload-progress" style="margin-top: 10px; display: none;">
+            <div style="background: #f0f0f0; border-radius: 4px; padding: 8px;">
+                <div id="progress-bar" style="background: var(--primary-green); height: 20px; border-radius: 4px; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <p id="progress-text">Uploading...</p>
+        </div>
+    `
+    
+    // Add form submission handler
+    document.getElementById('pdf-upload-form').addEventListener('submit', (e) => {
+        e.preventDefault()
+        uploadPDF(componentId)
+    })
+}
+
+// Function to upload PDF to Supabase Storage
+// Function to upload PDF to Supabase Storage
+async function uploadPDF(componentId) {
+    try {
+        const fileInput = document.getElementById('pdf-file')
+        const file = fileInput.files[0]
+        
+        if (!file) {
+            alert('Please select a PDF file')
+            return
+        }
+        
+        console.log('Uploading PDF for component:', componentId)
+        
+        // Show progress
+        document.getElementById('upload-progress').style.display = 'block'
+        
+        // Create unique filename
+        const fileName = `component_${componentId}_${Date.now()}.pdf`
+        
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await client.storage
+            .from('pdfs')
+            .upload(fileName, file)
+        
+        if (uploadError) {
+            console.error('Upload error:', uploadError)
+            alert('Error uploading PDF: ' + uploadError.message)
+            return
+        }
+        
+        console.log('File uploaded successfully:', uploadData)
+        
+        // Get the public URL
+        const { data: urlData } = client.storage
+            .from('pdfs')
+            .getPublicUrl(fileName)
+        
+        const pdfUrl = urlData.publicUrl
+        console.log('PDF URL:', pdfUrl)
+        
+        // Update the component record with the PDF URL
+        const { error: updateError } = await client
+            .from('Component Table')
+            .update({ drawing_pdf_url: pdfUrl })
+            .eq('id', componentId)
+        
+        if (updateError) {
+            console.error('Error updating component:', updateError)
+            alert('Error saving PDF URL: ' + updateError.message)
+            return
+        }
+        
+        alert('PDF uploaded successfully!')
+        
+        // Instead of reloading the page, refresh the current component display
+        // First get the updated component data
+        const { data: componentData, error: fetchError } = await client
+            .from('Component Table')
+            .select('*')
+            .eq('id', componentId)
+            .single()
+        
+        if (fetchError) {
+            console.error('Error fetching updated component:', fetchError)
+            location.reload() // fallback to page reload
+            return
+        }
+        
+        // Refresh the component display with updated data
+        handleRowClick(componentData)
         
     } catch (err) {
         console.error('Unexpected error:', err)
