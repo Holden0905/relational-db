@@ -45,11 +45,10 @@ async function loadComponents() {
 loadComponents()
 
 // Function to handle row clicks
-// Function to handle row clicks
+
 function handleRowClick(component) {
     console.log('Clicked component:', component)
     
-    // Update the details section
     const detailsContent = document.getElementById('details-content')
     detailsContent.innerHTML = `
         <h3>${component.Drawing} - ${component.Component}</h3>
@@ -61,7 +60,6 @@ function handleRowClick(component) {
         </div>
     `
     
-    // Actually call the function to load readings
     loadReadingsForComponent(component.id)
 }
 
@@ -84,34 +82,44 @@ async function loadReadingsForComponent(componentId) {
         console.log('Readings loaded:', data)
         
         // Update the readings section
-        // Update the readings section
-    const readingsSection = document.getElementById('readings-section')
+    // Update the readings section
+const readingsSection = document.getElementById('readings-section')
 
-    if (data.length === 0) {
-        readingsSection.innerHTML = `
-            <h4>Readings</h4>
-            <button onclick="showAddReadingForm(${componentId})" style="background: #008CBA; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Add New Reading</button>
-            <p>No readings found for this component.</p>
-        `
-    } else {
-        let readingsHTML = `
-            <h4>Readings</h4>
-            <button onclick="showAddReadingForm(${componentId})" style="background: #008CBA; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Add New Reading</button>
-            <ul>
-        `
-        data.forEach(reading => {
-            readingsHTML += `
-                <li>
+if (data.length === 0) {
+    readingsSection.innerHTML = `
+        <h4>Readings</h4>
+        <button onclick="showAddReadingForm(${componentId})" class="btn btn-primary" style="margin-bottom: 10px;">Add New Reading</button>
+        <p>No readings found for this component.</p>
+    `
+} else {
+    let readingsHTML = `
+        <h4>Readings</h4>
+        <button onclick="showAddReadingForm(${componentId})" class="btn btn-primary" style="margin-bottom: 10px;">Add New Reading</button>
+        <div class="readings-list">
+    `
+    data.forEach(reading => {
+        readingsHTML += `
+            <div class="reading-item">
+                <div class="reading-info">
                     <strong>Date:</strong> ${reading.test_date} | 
                     <strong>Inspector:</strong> ${reading.inspector} | 
                     <strong>Value:</strong> ${reading.reading_value}
                     ${reading.notes ? ` | <strong>Notes:</strong> ${reading.notes}` : ''}
-                </li>
-            `
-        })
-        readingsHTML += '</ul>'
-        readingsSection.innerHTML = readingsHTML
-    }
+                </div>
+                <div class="reading-actions">
+                    <button onclick="editReading(${reading.id}, ${componentId})" class="btn btn-warning">
+                        Edit
+                    </button>
+                    <button onclick="deleteReading(${reading.id}, ${componentId})" class="btn btn-danger">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `
+    })
+    readingsHTML += '</div>'
+    readingsSection.innerHTML = readingsHTML
+}
         
     } catch (err) {
         console.error('Error loading readings:', err)
@@ -122,30 +130,29 @@ async function loadReadingsForComponent(componentId) {
 function showAddReadingForm(componentId) {
     const readingsSection = document.getElementById('readings-section')
     
-    // Add the form HTML
     const formHTML = `
         <h4>Readings</h4>
-        <div id="add-reading-form" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+        <div class="form-container">
             <h5>Add New Reading</h5>
             <form id="reading-form">
-                <div style="margin-bottom: 10px;">
-                    <label>Test Date:</label><br>
-                    <input type="date" id="test-date" required style="width: 200px; padding: 5px;">
+                <div class="form-group">
+                    <label for="test-date">Test Date:</label>
+                    <input type="date" id="test-date" class="form-control" required>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <label>Inspector:</label><br>
-                    <input type="text" id="inspector" required style="width: 200px; padding: 5px;" placeholder="Enter inspector name">
+                <div class="form-group">
+                    <label for="inspector">Inspector:</label>
+                    <input type="text" id="inspector" class="form-control" required placeholder="Enter inspector name">
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <label>Reading Value:</label><br>
-                    <input type="number" id="reading-value" step="0.1" required style="width: 200px; padding: 5px;" placeholder="Enter reading value">
+                <div class="form-group">
+                    <label for="reading-value">Reading Value:</label>
+                    <input type="number" id="reading-value" class="form-control" step="0.1" required placeholder="Enter reading value">
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <label>Notes (optional):</label><br>
-                    <textarea id="notes" style="width: 200px; padding: 5px; height: 60px;" placeholder="Enter any notes"></textarea>
+                <div class="form-group">
+                    <label for="notes">Notes (optional):</label>
+                    <textarea id="notes" class="form-control" rows="3" placeholder="Enter any notes"></textarea>
                 </div>
-                <button type="submit" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Add Reading</button>
-                <button type="button" id="cancel-btn" style="background: #f44336; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Reading</button>
+                <button type="button" id="cancel-btn" class="btn btn-danger" style="margin-left: 10px;">Cancel</button>
             </form>
         </div>
         <div id="readings-list"></div>
@@ -153,14 +160,14 @@ function showAddReadingForm(componentId) {
     
     readingsSection.innerHTML = formHTML
     
-    // Add event listeners
+    // Add event listeners (same as before)
     document.getElementById('reading-form').addEventListener('submit', (e) => {
         e.preventDefault()
         addNewReading(componentId)
     })
     
     document.getElementById('cancel-btn').addEventListener('click', () => {
-        loadReadingsForComponent(componentId) // Just reload the readings without form
+        loadReadingsForComponent(componentId)
     })
 }
 
@@ -194,6 +201,141 @@ async function addNewReading(componentId) {
         alert('Reading added successfully!')
         
         // Reload the readings to show the new one
+        loadReadingsForComponent(componentId)
+        
+    } catch (err) {
+        console.error('Unexpected error:', err)
+        alert('Unexpected error occurred')
+    }
+}
+
+// Function to delete a reading
+async function deleteReading(readingId, componentId) {
+    // Confirm deletion
+    if (!confirm('Are you sure you want to delete this reading? This action cannot be undone.')) {
+        return
+    }
+    
+    try {
+        console.log('Deleting reading ID:', readingId)
+        
+        const { error } = await client
+            .from('Readings')
+            .delete()
+            .eq('id', readingId)
+        
+        if (error) {
+            console.error('Error deleting reading:', error)
+            alert('Error deleting reading: ' + error.message)
+            return
+        }
+        
+        console.log('Reading deleted successfully')
+        alert('Reading deleted successfully!')
+        
+        // Reload the readings to refresh the display
+        loadReadingsForComponent(componentId)
+        
+    } catch (err) {
+        console.error('Unexpected error:', err)
+        alert('Unexpected error occurred')
+    }
+}
+
+// Function to show edit form for a reading
+async function editReading(readingId, componentId) {
+    try {
+        console.log('Editing reading ID:', readingId)
+        
+        // First, get the current reading data
+        const { data, error } = await client
+            .from('Readings')
+            .select('*')
+            .eq('id', readingId)
+            .single()
+        
+        if (error) {
+            console.error('Error fetching reading:', error)
+            return
+        }
+        
+        const reading = data
+        console.log('Current reading data:', reading)
+        
+        // Create edit form
+        const readingsSection = document.getElementById('readings-section')
+        readingsSection.innerHTML = `
+            <h4>Readings</h4>
+            <div id="edit-reading-form" style="margin-bottom: 20px; padding: 15px; border: 2px solid #FF9800; border-radius: 5px; background-color: #FFF3E0;">
+                <h5>Edit Reading</h5>
+                <form id="edit-form">
+                    <div style="margin-bottom: 10px;">
+                        <label>Test Date:</label><br>
+                        <input type="date" id="edit-test-date" value="${reading.test_date}" required style="width: 200px; padding: 5px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label>Inspector:</label><br>
+                        <input type="text" id="edit-inspector" value="${reading.inspector}" required style="width: 200px; padding: 5px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label>Reading Value:</label><br>
+                        <input type="number" id="edit-reading-value" value="${reading.reading_value}" step="0.1" required style="width: 200px; padding: 5px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label>Notes (optional):</label><br>
+                        <textarea id="edit-notes" style="width: 200px; padding: 5px; height: 60px;">${reading.notes || ''}</textarea>
+                    </div>
+                    <button type="submit" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
+                    <button type="button" id="cancel-edit-btn" style="background: #f44336; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Cancel</button>
+                </form>
+            </div>
+        `
+        
+        // Add event listeners
+        document.getElementById('edit-form').addEventListener('submit', (e) => {
+            e.preventDefault()
+            updateReading(readingId, componentId)
+        })
+        
+        document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+            loadReadingsForComponent(componentId) // Cancel and reload
+        })
+        
+    } catch (err) {
+        console.error('Error setting up edit form:', err)
+    }
+}
+
+// Function to update a reading
+async function updateReading(readingId, componentId) {
+    try {
+        const testDate = document.getElementById('edit-test-date').value
+        const inspector = document.getElementById('edit-inspector').value
+        const readingValue = document.getElementById('edit-reading-value').value
+        const notes = document.getElementById('edit-notes').value
+        
+        console.log('Updating reading ID:', readingId)
+        
+        const { error } = await client
+            .from('Readings')
+            .update({
+                test_date: testDate,
+                inspector: inspector,
+                reading_value: parseFloat(readingValue),
+                notes: notes || null
+            })
+            .eq('id', readingId)
+        
+        if (error) {
+            console.error('Error updating reading:', error)
+            alert('Error updating reading: ' + error.message)
+            return
+        }
+        
+        console.log('Reading updated successfully')
+        alert('Reading updated successfully!')
+        
+        // Reload the readings to show the updated data
         loadReadingsForComponent(componentId)
         
     } catch (err) {
