@@ -242,3 +242,110 @@ tr:hover {
     border-radius: 4px;
     transition: width 0.3s ease;
 }
+
+/* Update the main layout */
+main {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* PDF Main Display - Hero section */
+.pdf-main-display {
+    width: 100%;
+    min-height: 500px;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 2px solid var(--primary-green);
+}
+
+.pdf-main-display h2 {
+    color: var(--primary-green);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    text-align: center;
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 0.5rem;
+}
+
+/* PDF Viewer in main section */
+.pdf-main-viewer {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--primary-green);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Bottom grid for components and details */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Update existing section styling */
+.section {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Component info banner */
+.component-info-banner {
+    background: linear-gradient(135deg, var(--light-green), var(--primary-green));
+    color: var(--white);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.component-info-banner h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* Upload button styling for main PDF section */
+.pdf-upload-main {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pdf-main-viewer {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+    
+    .pdf-main-viewer {
+        height: 300px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}

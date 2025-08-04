@@ -49,26 +49,38 @@ loadComponents()
 function handleRowClick(component) {
     console.log('Clicked component:', component)
     
+    // Update the main PDF section
+    const pdfMainContent = document.getElementById('pdf-main-content')
+    if (component.drawing_pdf_url) {
+        pdfMainContent.innerHTML = `
+            <div class="component-info-banner">
+                <h3>${component.Drawing} - ${component.Component} (${component.Unit})</h3>
+            </div>
+            <iframe src="${component.drawing_pdf_url}" class="pdf-main-viewer"></iframe>
+            <div class="pdf-upload-main" style="margin-top: 1rem;">
+                <button onclick="showPDFUpload(${component.id})" class="btn btn-warning">Replace PDF</button>
+            </div>
+        `
+    } else {
+        pdfMainContent.innerHTML = `
+            <div class="component-info-banner">
+                <h3>${component.Drawing} - ${component.Component} (${component.Unit})</h3>
+            </div>
+            <div class="pdf-upload-main">
+                <p style="color: var(--dark-gray); margin-bottom: 1.5rem;">No technical drawing available for this component.</p>
+                <button onclick="showPDFUpload(${component.id})" class="btn btn-primary">Upload PDF</button>
+            </div>
+        `
+    }
+    
+    // Update the component details section (without PDF info)
     const detailsContent = document.getElementById('details-content')
     detailsContent.innerHTML = `
-        <h3>${component.Drawing} - ${component.Component}</h3>
+        <h3>Component Information</h3>
+        <p><strong>Drawing:</strong> ${component.Drawing}</p>
+        <p><strong>Component:</strong> ${component.Component}</p>
         <p><strong>Unit:</strong> ${component.Unit}</p>
         <p><strong>Component ID:</strong> ${component.id}</p>
-        
-        <div id="pdf-section" style="margin: 1rem 0;">
-            <h4>Drawing PDF</h4>
-            <div id="pdf-display">
-                ${component.drawing_pdf_url ? 
-                    `<iframe src="${component.drawing_pdf_url}" width="100%" height="400px" style="border: 1px solid #ddd; border-radius: 4px;"></iframe>` 
-                    : '<p>No PDF uploaded for this component.</p>'
-                }
-            </div>
-            <div style="margin-top: 10px;">
-                <button onclick="showPDFUpload(${component.id})" class="btn btn-primary">
-                    ${component.drawing_pdf_url ? 'Replace PDF' : 'Upload PDF'}
-                </button>
-            </div>
-        </div>
         
         <div id="readings-section">
             <h4>Readings</h4>
@@ -362,18 +374,20 @@ async function updateReading(readingId, componentId) {
 
 // Function to show PDF upload form
 function showPDFUpload(componentId) {
-    const pdfSection = document.getElementById('pdf-section')
+    const pdfMainContent = document.getElementById('pdf-main-content')
     
-    pdfSection.innerHTML = `
-        <h4>Upload Drawing PDF</h4>
+    pdfMainContent.innerHTML = `
+        <h2>Upload Technical Drawing</h2>
         <div class="form-container">
             <form id="pdf-upload-form">
                 <div class="form-group">
                     <label for="pdf-file">Select PDF File:</label>
                     <input type="file" id="pdf-file" class="form-control" accept=".pdf" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Upload PDF</button>
-                <button type="button" onclick="location.reload()" class="btn btn-danger" style="margin-left: 10px;">Cancel</button>
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">Upload PDF</button>
+                    <button type="button" onclick="location.reload()" class="btn btn-danger" style="margin-left: 10px;">Cancel</button>
+                </div>
             </form>
         </div>
         <div id="upload-progress" style="margin-top: 10px; display: none;">
